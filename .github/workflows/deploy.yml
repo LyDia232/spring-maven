@@ -106,9 +106,19 @@ jobs:
         id: vars
         working-directory: spring-maven
         run: echo "VERSION=v$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
-      - name: Build & Push Docker image
+      - name: Build Docker image (no push yet)
         working-directory: spring-maven
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/springboot-app:latest -t ${{ secrets.DOCKER_USERNAME }}/springboot-app:${{ steps.vars.outputs.VERSION }} .
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ secrets.DOCKER_USERNAME }}/springboot-app:latest'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+      - name: Push Docker image
+        run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/springboot-app:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/springboot-app:${{ steps.vars.outputs.VERSION }}
