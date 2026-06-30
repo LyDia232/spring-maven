@@ -10,7 +10,7 @@ on:
       - develop
 jobs:
   build:
-    name: Build, Test & Sonar Analysis
+    name: Build, Test / Sonar Analysis
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
