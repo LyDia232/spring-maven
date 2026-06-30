@@ -64,8 +64,13 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Set version tag
+        id: vars
+        working-directory: spring-maven
+        run: echo "VERSION=v$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
       - name: Build & Push Docker image
         working-directory: spring-maven
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/springboot-app:latest .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/springboot-app:latest -t ${{ secrets.DOCKER_USERNAME }}/springboot-app:${{ steps.vars.outputs.VERSION }} .
           docker push ${{ secrets.DOCKER_USERNAME }}/springboot-app:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/springboot-app:${{ steps.vars.outputs.VERSION }}
